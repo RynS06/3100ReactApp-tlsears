@@ -7,20 +7,38 @@ import React, { useState, useEffect } from "react";
 function MyApp() {
   const [characters, setCharacters] = useState([]);
 
- function updateList(person) {
+function updateList(person) {
   postUser(person)
-    .then(() => setCharacters([...characters, person]))
+    .then((response) => {
+      if (response.status !== 201) {
+        throw new Error(`User was not created. Status: ${response.status}`);
+      }
+
+      return response.json();
+    })
+    .then((newUser) => {
+      setCharacters([...characters, newUser]);
+    })
     .catch((error) => {
       console.log(error);
     });
 }
 
-  function removeOneCharacter(index) {
-    const updated = characters.filter((character, i) => {
-      return i !== index;
-    });
-    setCharacters(updated);
-  }
+ function removeOneCharacter(id) {
+  const promise = fetch(`http://localhost:8000/users/${id}`, {
+    method: "DELETE",
+  });
+
+  promise.then((response) => {
+    if (response.status === 204) {
+      const updated = characters.filter((character) => {
+        return character.id !== id;
+      });
+
+      setCharacters(updated);
+    }
+  });
+}
 
 
   function fetchUsers() {

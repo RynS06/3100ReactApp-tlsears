@@ -13,6 +13,8 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+function generateId(){return Math.random().toString(36).slice(2, 8);}
+
 const deleteUserById = (id) => {
   const index = users.users_list.findIndex((user) => user.id === id);
 
@@ -30,7 +32,7 @@ app.delete("/users/:id", (req, res) => {
     return res.status(404).send("Resource not found.");
   }
 
-  res.send(deletedUser);
+  return res.status(204).send();
 });
 
 const findUsers = (name, job) => {
@@ -79,9 +81,9 @@ const addUser = (user) => {
 };
 
 app.post("/users", (req, res) => {
-  const userToAdd = req.body;
+  const userToAdd = {...req.body, id: generateId()};
   addUser(userToAdd);
-  res.send();
+  res.status(201).send(userToAdd);
 });
 
 app.listen(port, () => {
